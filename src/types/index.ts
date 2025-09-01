@@ -68,8 +68,6 @@ export interface MiniMaxConfig {
 }
 
 export interface ApiConfig {
-    gemini: GeminiConfig;
-    elevenLabs: ElevenLabsConfig;
     imageFx: ImageFxConfig;
     minimax: MiniMaxConfig;
 }

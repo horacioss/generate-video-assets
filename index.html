@@ -15,18 +15,16 @@
             <label for="videoTitle">Título del video:</label>
             <input type="text" id="videoTitle" required placeholder="Ingrese el título del video">
         </div>
-    </div>
+        <div class="input-group-small">
+            <div id="status"></div>
+        </div>
     <div class="body-container">
         <div class="form-container">
             <h2>Generar audio e imágenes</h2>
             <div class="input-group">
                 <label for="scriptFromChatGPT">Guion de Chat-GPT:</label>
-                <textarea type="text" id="scriptFromChatGPT"
-                    placeholder="Guion generado por Chat-GPT:&#10&#10Escena1&#10Storyteller: ....&#10ImagePrompt1: ...."></textarea>
-            </div>
-            <div class="input-group">
-                <label for="imageFXToken">Token de ImageFX:</label>
-                <input type="text" id="imageFXToken" placeholder="Ingrese el token de ImageFX">
+                <textarea type="text" id="scriptFromChatGPT" 
+                    placeholder="Escena1&#10Storyteller: ...&#10ImagePrompt1: ..."></textarea>
             </div>
             <div class="input-group">
                 <label for="imageAspectRatio">Tipo de imagen para el video: </label>
@@ -36,7 +34,6 @@
                 </select>
             </div>
             <button onclick="startGeneration()">Generate</button>
-            <div id="status"></div>
         </div>
         <div class="form-container">
             <h2>Generar solo audio</h2>
@@ -50,7 +47,7 @@
             <h2>Generar solo imágenes</h2>
             <div class="input-group">
                 <label for="soloImagePrompts">Prompts de las imágenes:</label>
-                <textarea id="soloImagePrompts" placeholder="ImagePrompt2: ..."></textarea>
+                <textarea id="soloImagePrompts" placeholder="ImagePrompt1: ...&#10&#10ImagePrompt2: ..."></textarea>
             </div>
             <div class="input-group">
                 <label for="soloImageAspectRatio">Tipo de imagen para el video: </label>
@@ -78,7 +75,7 @@
             const status = document.getElementById('status');
 
             status.style.background = '#fff3cd';
-            status.innerHTML = 'Generacion de contenido en proceso...';
+            status.innerHTML = 'Generación de contenido en proceso...';
 
             try {
                 const serverUrl = window.location.origin;
@@ -106,7 +103,7 @@
 
                 if (result.success) {
                     status.style.background = '#d4edda';
-                    status.innerHTML = '¡Generacion completada con éxito!';
+                    status.innerHTML = '¡Generación completada con éxito!';
                 } else {
                     status.style.background = '#f8d7da';
                     status.innerHTML = `Error: ${result.error}`;
@@ -129,7 +126,7 @@
             }
 
             status.style.background = '#fff3cd';
-            status.innerHTML = 'Generacion de audio en proceso...';
+            status.innerHTML = 'Generación de audio en proceso...';
 
             try {
                 const serverUrl = window.location.origin;
@@ -149,7 +146,7 @@
 
                 if (result.success) {
                     status.style.background = '#d4edda';
-                    status.innerHTML = '¡Generacion de audio completada con éxito!';
+                    status.innerHTML = '¡Generación de audio completada con éxito!';
                 } else {
                     status.style.background = '#f8d7da';
                     status.innerHTML = `Error: ${result.error}`;
@@ -162,12 +159,18 @@
         }
 
         async function startImageGeneration() {
+            const title = document.getElementById('videoTitle').value;
             const soloImagePrompts = document.getElementById('soloImagePrompts').value;
             const soloImageAspectRatio = document.getElementById('soloImageAspectRatio').value;
             const status = document.getElementById('status');
 
+            if (title.trim() === '') {
+                alert('Por favor ingrese un título para el video.');
+                return;
+            }
+
             status.style.background = '#fff3cd';
-            status.innerHTML = 'Generacion de imágenes en proceso...';
+            status.innerHTML = 'Generación de imágenes en proceso...';
 
             try {
                 const serverUrl = window.location.origin;
@@ -178,6 +181,7 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
+                        title: title,
                         prompts: soloImagePrompts,
                         aspectRatio: soloImageAspectRatio
                     })
@@ -187,7 +191,7 @@
 
                 if (result.success) {
                     status.style.background = '#d4edda';
-                    status.innerHTML = '¡Generacion de imágenes completada con éxito!';
+                    status.innerHTML = '¡Generación de imágenes completada con éxito!';
                 } else {
                     status.style.background = '#f8d7da';
                     status.innerHTML = `Error: ${result.error}`;

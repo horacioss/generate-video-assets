@@ -12,11 +12,22 @@ class GeminiTTS {
                     'X-goog-api-key': config.apis.gemini.apiKey
                 },
                 body: JSON.stringify({
-                    text: text,
-                    options: {
-                        language: 'es-US',
-                        type: 'male'
-                    }
+                    contents: [{
+                        parts: [{
+                            text: `Deep voice: ${text}`
+                        }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Algieba"
+                                }
+                            }
+                        }
+                    },
+                    "model": "gemini-2.5-flash-preview-tts"
                 })
             });
 

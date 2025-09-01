@@ -19,6 +19,11 @@ const config: Config = {
         imageFx: {
             endpoint: process.env.IMAGEFX_API_ENDPOINT || '',
             apiKey: process.env.IMAGEFX_API_KEY || ''
+        },
+        minimax: {
+            endpoint: process.env.MINIMAX_ENDPOINT || '',
+            apiKey: process.env.MINIMAX_API_KEY || '',
+            groupId: process.env.MINIMAX_GROUP_ID || '',
         }
     }
 };

@@ -9,7 +9,13 @@ export async function ensureDir(dirPath: string): Promise<void> {
     }
 }
 
-export async function saveFile(dirPath: string, filename: string, data: Buffer | string): Promise<void> {
-    const filePath = path.join(dirPath, filename);
-    await fs.writeFile(filePath, data);
+export async function saveFile(dirPath: string, filename: string, data: Buffer | string): Promise<boolean> {
+    try {
+        const filePath = path.join(dirPath, filename);
+        await fs.writeFile(filePath, data);
+        return true;
+    } catch (error) {
+        console.error('Error saving file:', error);
+        return false;
+    }
 }

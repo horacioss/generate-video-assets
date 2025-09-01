@@ -1,69 +1,54 @@
-import path from 'path';
-import { GenerateResponse, AudioData, ImageData } from '../types';
-import { ensureDir, saveFile } from '../utils/fileUtils';
-import { extractStoryTellerParts, extractImagePrompts } from '../utils/contentUtils';
-import geminiTTS from './geminiTTS';
+import fs from 'fs/promises';
+import { GenerateResponse } from '../types';
+import { saveFile } from '../utils/fileUtils';
+import { extractImagePrompts } from '../utils/contentUtils';
 import imageFxService from './imageFxService';
+import { getFolderPath } from '../utils/getFolderPath';
+import { generateAndSaveAudio } from '../utils/generateAudio';
 
 class GenerationService {
     async generateContent(
-        title: string, 
-        scriptFromChatGPT: string = '', 
-        imageFXToken?: string,
-        imageAspectRatio?: string
+        title: string,
+        scriptFromChatGPT: string = '',
+        imageAspectRatio: string
     ): Promise<GenerateResponse> {
         try {
-            const folderName = this._sanitizeFolderName(title);
-            const userProfileDir = process.env.USERPROFILE || process.env.HOME || process.cwd();
-            const baseDir = path.join(userProfileDir, 'Documents', 'Videos Cicatrices de la Historia');
-            const folderPath = path.join(baseDir, folderName);
-            await ensureDir(folderPath);
+            const folderPath = await getFolderPath(title);
 
             // Generate audio
-            const audioData = await this._generateAndSaveAudio(folderPath, scriptFromChatGPT);
+            await generateAndSaveAudio(folderPath, scriptFromChatGPT);
 
             // Generate images
-            await this._generateAndSaveImages(folderPath, scriptFromChatGPT, imageFXToken, imageAspectRatio);
+            await this.generateAndSaveImages(folderPath, scriptFromChatGPT, imageAspectRatio);
 
             return {
-                success: true,
-                folder: folderName,
-                audioPath: `${folderName}/Dialog.wav`,
-                audioMetadata: {
-                    format: 'wav',
-                    contentType: 'audio/wav',
-                    bufferLength: audioData.buffer.length
-                }
+                success: true
             };
         } catch (error) {
             throw new Error(`Content generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
-    private _sanitizeFolderName(title: string): string {
-        return title.replace(/[^a-zA-Z0-9]/g, '_');
-    }
-
-    private async _generateAndSaveAudio(folderPath: string, script: string): Promise<AudioData> {
-        const storyTellerText = extractStoryTellerParts(script);
-        const audioData = await geminiTTS.generateGeminiAudio(storyTellerText);
-        await saveFile(folderPath, 'Dialog.wav', audioData.buffer);
-        return audioData;
-    }
-
-    private async _generateAndSaveImages(
-        folderPath: string, 
-        script: string, 
-        token?: string,
-        aspectRatio?: string
-    ): Promise<void> {
+    public async generateAndSaveImages(
+        folderPath: string,
+        script: string,
+        aspectRatio: string
+    ): Promise<{ success: boolean }> {
         const imagePrompts = extractImagePrompts(script);
-        for (let i = 0; i < imagePrompts.length; i++) {
-            const images = await imageFxService.generateImages(imagePrompts[i], token, aspectRatio);
-            for (let j = 0; j < images.length; j++) {
-                await saveFile(folderPath, `image_${i + 1}_${j + 1}.png`, images[j].buffer);
+        if (imagePrompts.length > 0) {
+            imagePrompts.forEach(async (imageObject) => {
+                const images = await imageFxService.generateImages(imageObject, aspectRatio);
+                if (Array.isArray(images)) {
+                    images.forEach(async (generatedImage, index) => {
+                        await saveFile(folderPath, `${imageObject.imageKey}_${index + 1}.png`, Buffer.from(generatedImage.encodedImage, 'base64'))
+                    });
+                } else {
+                    await fs.appendFile(`${folderPath}/Errores.txt`, `'${imageObject.imageKey}' no Creadas ${images.error.toString()}.\n`);
+                }
             }
+            );
         }
+        return { success: true };
     }
 }
 

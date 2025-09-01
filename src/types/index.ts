@@ -2,8 +2,30 @@
 export interface GenerateRequest {
     title: string;
     scriptFromChatGPT?: string;
-    imageFXToken?: string;
-    imageAspectRatio?: string;
+    imageAspectRatio: string;
+}
+
+export interface AudioGenerationRequest {
+    title: string;
+    script: string;
+}
+
+export interface AudioGenerationResponse {
+    success: boolean;
+    error?: string;
+    message?: string;
+}
+
+export interface ImageGenerationRequest {
+    title: string;
+    prompts: string;
+    aspectRatio: string;
+}
+
+export interface ImageGenerationResponse {
+    success: boolean;
+    error?: string;
+    message?: string;
 }
 
 export interface AudioMetadata {
@@ -39,10 +61,17 @@ export interface ImageFxConfig {
     apiKey: string;
 }
 
+export interface MiniMaxConfig {
+    endpoint: string;
+    apiKey: string;
+    groupId: string;
+}
+
 export interface ApiConfig {
     gemini: GeminiConfig;
     elevenLabs: ElevenLabsConfig;
     imageFx: ImageFxConfig;
+    minimax: MiniMaxConfig;
 }
 
 export interface Config {
@@ -51,14 +80,74 @@ export interface Config {
 }
 
 // Service Types
+
+export interface AudioResponse {
+  data: {
+    audio: string,
+    status: number,
+    ced: string
+  }
+  extra_info: {
+    audio_length: number,
+    audio_sample_rate: number,
+    audio_size: number,
+    bitrate: number,
+    word_count: number,
+    invisible_character_ratio: number,
+    usage_characters: number,
+    audio_format: string,
+    audio_channel: 1
+  },
+  trace_id: string,
+  base_resp: {
+    status_code: number,
+    status_msg: string
+  }
+}
+
 export interface AudioData {
     buffer: Buffer;
+}
+
+export interface ImageObjectType {
+    imageKey: string;
+    promptText: string;
 }
 
 export interface ImageData {
     buffer: Buffer;
 }
 
+export interface GeneratedImage {
+    encodedImage: string;
+    seed: number;
+    mediaGenerationId: string;
+    prompt: string;
+    modelNameType: string;
+    workflowId: string;
+    fingerprintLogRecordId: string;
+    aspectRatio: string;
+}
+
+export interface ImagePanel {
+    prompt: string;
+    generatedImages: GeneratedImage[]
+}
+
 export interface ImageGenerationResult {
-    images: ImageData[];
+    imagePanels: ImagePanel[]
+}
+
+export interface ImageErrorResponse {
+  error: {
+    code: number,
+    message: string,
+    status: string,
+    details: [
+      {
+        "@type": string,
+        reason: string
+      }
+    ]
+  }
 }

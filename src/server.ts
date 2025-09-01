@@ -12,6 +12,8 @@ app.use(express.static('.'));
 
 // Routes
 app.use('/generate', generateRoute);
+app.use('/generate/audio', generateRoute);
+app.use('/generate/images', generateRoute);
 
 // Start server
 const server = app.listen(config.port, () => {

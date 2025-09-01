@@ -1,108 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-container {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background: #45a049;
-        }
-        #status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        #status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-        #status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        #status.processing {
-            background: #fff3cd;
-            color: #856404;
-        }
-        select {
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        select option {
-            padding: 8px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="form-container">
-        <h1>Video Generator</h1>
-        <div class="input-group">
+    <h1>Video Assets Generator</h1>
+    <div>
+        <div class="input-group-small">
             <label for="videoTitle">Título del video:</label>
             <input type="text" id="videoTitle" required placeholder="Ingrese el título del video">
         </div>
-        <div class="input-group">
-            <label for="scriptFromChatGPT">Guion de Chat-GPT:</label>
-            <textarea type="text" id="scriptFromChatGPT" placeholder="Guion generado por Chat-GPT" ></textarea>
+    </div>
+    <div class="body-container">
+        <div class="form-container">
+            <h2>Generar audio e imágenes</h2>
+            <div class="input-group">
+                <label for="scriptFromChatGPT">Guion de Chat-GPT:</label>
+                <textarea type="text" id="scriptFromChatGPT"
+                    placeholder="Guion generado por Chat-GPT:&#10&#10Escena1&#10Storyteller: ....&#10ImagePrompt1: ...."></textarea>
+            </div>
+            <div class="input-group">
+                <label for="imageFXToken">Token de ImageFX:</label>
+                <input type="text" id="imageFXToken" placeholder="Ingrese el token de ImageFX">
+            </div>
+            <div class="input-group">
+                <label for="imageAspectRatio">Tipo de imagen para el video: </label>
+                <select id="imageAspectRatio">
+                    <option value="IMAGE_ASPECT_RATIO_LANDSCAPE">Horizontal</option>
+                    <option value="IMAGE_ASPECT_RATIO_PORTRAIT">Vertical</option>
+                </select>
+            </div>
+            <button onclick="startGeneration()">Generate</button>
+            <div id="status"></div>
         </div>
-        <div class="input-group">
-            <label for="imageFXToken">Token de ImageFX:</label>
-            <input type="text" id="imageFXToken" placeholder="Ingrese el token de ImageFX">
+        <div class="form-container">
+            <h2>Generar solo audio</h2>
+            <div class="input-group">
+                <label for="soloAudioScript">Guion:</label>
+                <textarea id="soloAudioScript" placeholder=""></textarea>
+            </div>
+            <button onclick="startAudioGeneration()">Generar Audio</button>
         </div>
-        <div class="input-group">
-            <label for="imageAspectRatio">Tipo de imagen para el video: </label>
-            <select id="imageAspectRatio">
-                <option value="IMAGE_ASPECT_RATIO_LANDSCAPE">Horizontal</option>
-                <option value="IMAGE_ASPECT_RATIO_PORTRAIT">Vertical</option>
-            </select>
+        <div class="form-container">
+            <h2>Generar solo imágenes</h2>
+            <div class="input-group">
+                <label for="soloImagePrompts">Prompts de las imágenes:</label>
+                <textarea id="soloImagePrompts" placeholder="ImagePrompt2: ..."></textarea>
+            </div>
+            <div class="input-group">
+                <label for="soloImageAspectRatio">Tipo de imagen para el video: </label>
+                <select id="soloImageAspectRatio">
+                    <option value="IMAGE_ASPECT_RATIO_LANDSCAPE">Horizontal</option>
+                    <option value="IMAGE_ASPECT_RATIO_PORTRAIT">Vertical</option>
+                </select>
+            </div>
+            <button onclick="startImageGeneration()">Generar Imágenes</button>
         </div>
-        <button onclick="startGeneration()">Generate</button>
-        <div id="status"></div>
-
     </div>
 
     <script>
@@ -111,14 +69,14 @@
             const scriptFromChatGPT = document.getElementById('scriptFromChatGPT').value;
             const imageFXToken = document.getElementById('imageFXToken').value;
             const imageAspectRatio = document.getElementById('imageAspectRatio').value;
-            
+
             if (!videoTitle) {
                 alert('Por favor ingrese un título para el video.');
                 return;
             }
 
             const status = document.getElementById('status');
-            
+
             status.style.background = '#fff3cd';
             status.innerHTML = 'Generacion de contenido en proceso...';
 
@@ -130,7 +88,7 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         title: videoTitle,
                         scriptFromChatGPT: scriptFromChatGPT,
                         imageFXToken: imageFXToken,
@@ -159,6 +117,88 @@
                 status.innerHTML = `Error: ${error.message}`;
             }
         }
+
+        async function startAudioGeneration() {
+            const soloAudioScript = document.getElementById('soloAudioScript').value;
+            const videoTitle = document.getElementById('videoTitle').value;
+            const status = document.getElementById('status');
+
+            if (videoTitle.trim() === '' || soloAudioScript.trim() === '') {
+                alert('Por favor ingrese un título y un guion para el video.');
+                return;
+            }
+
+            status.style.background = '#fff3cd';
+            status.innerHTML = 'Generacion de audio en proceso...';
+
+            try {
+                const serverUrl = window.location.origin;
+                const response = await fetch(`${serverUrl}/generate/audio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: videoTitle.trim(),
+                        script: soloAudioScript.trim()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    status.style.background = '#d4edda';
+                    status.innerHTML = '¡Generacion de audio completada con éxito!';
+                } else {
+                    status.style.background = '#f8d7da';
+                    status.innerHTML = `Error: ${result.error}`;
+                }
+            } catch (error) {
+                console.error('Error en la generación del audio:', error);
+                status.style.background = '#f8d7da';
+                status.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        async function startImageGeneration() {
+            const soloImagePrompts = document.getElementById('soloImagePrompts').value;
+            const soloImageAspectRatio = document.getElementById('soloImageAspectRatio').value;
+            const status = document.getElementById('status');
+
+            status.style.background = '#fff3cd';
+            status.innerHTML = 'Generacion de imágenes en proceso...';
+
+            try {
+                const serverUrl = window.location.origin;
+                const response = await fetch(`${serverUrl}/generate/images`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompts: soloImagePrompts,
+                        aspectRatio: soloImageAspectRatio
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    status.style.background = '#d4edda';
+                    status.innerHTML = '¡Generacion de imágenes completada con éxito!';
+                } else {
+                    status.style.background = '#f8d7da';
+                    status.innerHTML = `Error: ${result.error}`;
+                }
+            } catch (error) {
+                console.error('Error en la generación de imágenes:', error);
+                status.style.background = '#f8d7da';
+                status.innerHTML = `Error: ${error.message}`;
+            }
+        }
     </script>
 </body>
+
 </html>

@@ -14,20 +14,29 @@ StoryTeller: This is the second part.`;
 
 test('extractStoryTellerParts - case insensitive', (t) => {
     const script = `Escena1
-storyteller: Lower case test.
-STORYTELLER: Upper case test.`;
+    storyteller: Lower case test.
+    STORYTELLER: Upper case test.
+    Another line without storyteller. With more text.
+    ImagePrompt1: An image prompt
+    StoryTeller:
+    This line should be included.
+    Random line without key.
+    StoryTeller:
+    `;
+
 
     const result = extractStoryTellerParts(script);
-    assert.strictEqual(result, 'Lower case test. <#1#>\nUpper case test.');
+    console.log(`Result of extraction: ${result}`);
+    assert.strictEqual(result, 'Lower case test. <#1#>\nUpper case test. <#1#>\nAnother line without storyteller. With more text.');
 });
 
 test('extractStoryTellerParts - no storyteller format', (t) => {
-    const script = `Line 1
-Line 2
-Line 3`;
+    const script = `Line 1.
+Line 2.
+Line 3.`;
 
     const result = extractStoryTellerParts(script);
-    assert.strictEqual(result, 'Line 1 <#1#>\nLine 2 <#1#>\nLine 3');
+    assert.strictEqual(result, 'Line 1. <#1#>\nLine 2. <#1#>\nLine 3.');
 });
 
 test('extractStoryTellerParts - empty content', (t) => {

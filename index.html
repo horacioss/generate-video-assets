@@ -64,7 +64,6 @@
         async function startGeneration() {
             const videoTitle = document.getElementById('videoTitle').value;
             const scriptFromChatGPT = document.getElementById('scriptFromChatGPT').value;
-            const imageFXToken = document.getElementById('imageFXToken').value;
             const imageAspectRatio = document.getElementById('imageAspectRatio').value;
 
             if (!videoTitle) {
@@ -88,7 +87,6 @@
                     body: JSON.stringify({
                         title: videoTitle,
                         scriptFromChatGPT: scriptFromChatGPT,
-                        imageFXToken: imageFXToken,
                         imageAspectRatio: imageAspectRatio
                     })
                 });

@@ -11,13 +11,15 @@ export function extractStoryTellerParts(content: string): string {
     }
 
     const lines = content.split('\n');
-    const separator = ' <#1#>\n';
+    const modifiedLines = lines.map(line => line.replace('.', '.<#1#>'));
+
+    const separator = ' <#1.5#>\n';
 
     // Check if content contains StoryTeller format
     if (content.toLowerCase().includes("storyteller")) {
         const storyTellerParts: string[] = [];
         
-        for (const line of lines) {
+        for (const line of modifiedLines) {
             const trimmedLine = line.trim();
             // Case-insensitive match for StoryTeller
             if (trimmedLine.match(/^storyteller:/i)) {
@@ -30,10 +32,10 @@ export function extractStoryTellerParts(content: string): string {
         
         return storyTellerParts.length > 0 
             ? storyTellerParts.join(separator)
-            : lines.filter(line => line.trim()).join(separator);
+            : modifiedLines.filter(line => line.trim()).join(separator);
     } else {
         // If no StoryTeller format, join all non-empty lines
-        return lines.filter(line => line.trim()).join(separator);
+        return modifiedLines.filter(line => line.trim()).join(separator);
     }
 }
 

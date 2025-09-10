@@ -5,14 +5,15 @@ import { GeneratedImage, ImageErrorResponse, ImageGenerationResult, ImageObjectT
 class ImageFxService {
     async generateImages(prompt: ImageObjectType, aspectRatio?: string): Promise<GeneratedImage[] | ImageErrorResponse> {
         try {
+
             const headers: Record<string, string> = {
                 'Accept': '*/*',
                 'Content-Type': 'text/plain;charset=UTF-8',
                 'Authorization': `Bearer ${config.apis.imageFx.apiKey}`,
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
             };
-
-            const response = await fetch(config.apis.imageFx.endpoint, {
+            
+            const payload = {
                 method: 'POST',
                 headers,
                 body: JSON.stringify(
@@ -32,7 +33,11 @@ class ImageFxService {
                         aspectRatio: aspectRatio
                     }
                 )
-            });
+            }
+
+            console.log('Sending request to ImageFx API with payload:', payload);
+
+            const response = await fetch(config.apis.imageFx.endpoint, payload);
 
             if (!response.ok) {
                 let jsonResponseError: ImageErrorResponse = await response.json();
